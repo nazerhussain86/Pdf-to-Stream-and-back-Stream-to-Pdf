@@ -1,0 +1,85 @@
+using (FileStream file = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+    {
+        stream.WriteTo(file);
+    }
+
+
+using PdfSharp.Pdf;
+using System.IO;
+
+public class PdfStreamExample
+{
+    public MemoryStream PdfToStream(string pdfFilePath)
+    {
+        // Open the PDF file using a FileStream
+        using (FileStream fileStream = new FileStream(pdfFilePath, FileMode.Open, FileAccess.Read))
+        {
+            // Create a memory stream to store the PDF content
+            MemoryStream stream = new MemoryStream();
+
+            // Copy the content from the FileStream to the MemoryStream
+            fileStream.CopyTo(stream);
+
+            // Reset the memory stream position to the beginning
+            stream.Position = 0;
+
+            return stream;
+        }
+    }
+}
+
+
+using PdfSharp.Pdf;
+using PdfSharp.Drawing;
+using System.IO;
+
+public class PdfStreamExample
+{
+    public void CreatePdfFromStream(MemoryStream stream, string outputPath)
+    {
+        // Load the PDF document from the memory stream
+        PdfDocument document = PdfDocument.Load(stream);
+
+        // Create a new PDF document to write to
+        PdfDocument newDocument = new PdfDocument();
+
+        // Copy pages from the loaded document to the new document
+        foreach (PdfPage page in document.Pages)
+        {
+            PdfPage newPage = newDocument.AddPage();
+            using (XGraphics gfx = XGraphics.FromPdfPage(newPage))
+            {
+                XForm form = XForm.FromFormXObject(page);
+                gfx.DrawImage(form, 0, 0);
+            }
+        }
+
+        // Save the new document to the specified output path using a FileStream
+        using (FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+        {
+            newDocument.Save(fileStream);
+        }
+
+        // Clean up
+        document.Close();
+        newDocument.Close();
+    }
+}
+gmeni 
+
+using System.IO;
+
+public static void ConvertPdfToStreamAndBack(string inputPath, string outputPath)
+{
+    // Read PDF to stream
+    byte[] pdfBytes = System.IO.File.ReadAllBytes(inputPath);
+    MemoryStream pdfStream = new MemoryStream(pdfBytes);
+
+    // (Optional: Modify stream with PDF library)
+
+    // Write stream to new PDF
+    using (FileStream outputFile = FileStream(outputPath, FileMode.Create))
+    {
+        pdfStream.CopyTo(outputFile);
+    }
+}
